@@ -1,28 +1,28 @@
 FROM alpine:latest
 
-# Update to the latest stable version (as of April 2026)
+# Set the PocketBase version (update this when a new version comes out)
 ARG PB_VERSION=0.37.3
 
 RUN apk add --no-cache \
     unzip \
-    ca-certificates
+    ca-certificates \
+    wget
 
 # Download and extract PocketBase
-ADD https://github.com/pocketbase/pocketbase/releases/download/v\( 0.37.3/pocketbase_ \)0.37.3_linux_amd64.zip /tmp/pb.zip
-RUN unzip /tmp/pb.zip -d /pb/ \
-    && rm /tmp/pb.zip \
-    && chmod +x /pb/pocketbase
+RUN wget https://github.com/pocketbase/pocketbase/releases/download/v\( {PB_VERSION}/pocketbase_ \){PB_VERSION}_linux_amd64.zip \
+    -O /tmp/pb.zip && \
+    unzip /tmp/pb.zip -d /pb/ && \
+    rm /tmp/pb.zip && \
+    chmod +x /pb/pocketbase
 
-# Optional: Copy your custom migrations (uncomment if needed)
+# Optional: copy your migrations/hooks if you use them
 # COPY ./pb_migrations /pb/pb_migrations
-
-# Optional: Copy your custom hooks (uncomment if needed)
 # COPY ./pb_hooks /pb/pb_hooks
 
-# Create pb_data directory (helps with volume mounting)
+# Create data directory (good for volume mounting)
 RUN mkdir -p /pb/pb_data
 
 EXPOSE 8080
 
-# Start PocketBase (default port is 8080)
+# Start PocketBase
 CMD ["/pb/pocketbase", "serve", "--http=0.0.0.0:8080"]
